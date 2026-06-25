@@ -8,11 +8,17 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body { height: 100%; }
+    html, body {
+      height: 100%;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
       background: #ffffff;
+      background-image:
+        linear-gradient(rgba(107,31,31,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(107,31,31,0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -27,15 +33,16 @@
     .btn-login {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
-      font-weight: 400;
       color: #000;
-      background: transparent;
-      border: none;
+      background: rgba(255,255,255,0.85);
+      border: 0.5px solid #000;
+      border-radius: 6px;
+      padding: 7px 18px;
       cursor: pointer;
       text-decoration: none;
     }
 
-    .btn-login:hover { opacity: 0.5; }
+    .btn-login:hover { opacity: 0.6; }
 
     main {
       flex: 1;
@@ -43,66 +50,104 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2.5rem;
+      text-align: center;
+      padding: 2rem 3rem;
+      gap: 2rem;
     }
 
     h1 {
       font-family: 'Inter', sans-serif;
-      font-size: clamp(64px, 10vw, 120px);
+      font-size: clamp(64px, 10vw, 110px);
       font-weight: 900;
-      color: #000000;
+      color: #000;
       line-height: 1.0;
       letter-spacing: -3px;
-      text-align: center;
     }
 
+    h1 span { color: #6B1F1F; }
+
     .btn-forum {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #6B1F1F;
+      color: #fff;
       font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 400;
-      color: #fff;
-      background: #000;
+      letter-spacing: 0.03em;
       border: none;
       border-radius: 6px;
-      padding: 12px 28px;
+      padding: 11px 24px;
       cursor: pointer;
       text-decoration: none;
-      letter-spacing: 0.02em;
     }
 
-    .btn-forum:hover { opacity: 0.7; }
+    .btn-forum:hover { opacity: 0.8; }
+
+    .corner-dot {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #6B1F1F;
+      opacity: 0.3;
+    }
+
+    .dot-tl { top: 32px; left: 32px; }
+    .dot-tr { top: 32px; right: 32px; }
+    .dot-bl { bottom: 48px; left: 32px; }
+    .dot-br { bottom: 48px; right: 32px; }
 
     footer {
-      border-top: 0.5px solid #e0e0e0;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.6);
     }
 
-    footer a {
+    .footer-links { display: flex; gap: 1.5rem; }
+
+    .footer-links a {
       font-size: 11px;
       color: #999;
       text-decoration: none;
     }
 
-    footer a:hover { color: #000; }
+    .footer-links a:hover { color: #6B1F1F; }
+
+    .footer-right { font-size: 11px; color: #bbb; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 52px; letter-spacing: -2px; }
+    }
   </style>
 </head>
 <body>
 
+  <div class="corner-dot dot-tl"></div>
+  <div class="corner-dot dot-tr"></div>
+  <div class="corner-dot dot-bl"></div>
+  <div class="corner-dot dot-br"></div>
+
   <nav>
-    <a href="/login" class="btn-login">Log in</a>
+    <a href="login.html" class="btn-login">Log in</a>
   </nav>
 
   <main>
-    <h1>The MBA Club</h1>
-    <a href="/forum.html" class="btn-forum">Enter the forum →</a>
+    <h1>The <span>MBA</span> Club</h1>
+    <a href="forum.html" class="btn-forum">Enter the forum →</a>
   </main>
 
   <footer>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
+    <div class="footer-links">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+    <span class="footer-right">The MBA Club · 2025</span>
   </footer>
 
 </body>
