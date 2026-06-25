@@ -113,11 +113,12 @@
     .back:hover { color: #000; }
 
     .post-category-tag {
-      background: #f0f0f0;
-      color: #555;
+      background: #fdf0f0;
+      color: #6B1F1F;
       padding: 3px 10px;
       border-radius: 4px;
       font-size: 11px;
+      font-weight: 500;
       display: inline-block;
       margin-bottom: 1rem;
     }
@@ -155,9 +156,18 @@
       letter-spacing: 0.06em;
     }
 
+    /* EXPERT REPLY */
     .reply-item {
       padding: 1.2rem 0;
       border-bottom: 0.5px solid #f0f0f0;
+    }
+
+    .reply-item.expert-reply {
+      background: #fdf8f8;
+      border: 0.5px solid #e8c8c8;
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
     }
 
     .reply-meta {
@@ -166,6 +176,27 @@
       margin-bottom: 6px;
       display: flex;
       gap: 8px;
+      align-items: center;
+    }
+
+    .expert-badge {
+      background: #6B1F1F;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .pinned-label {
+      font-size: 10px;
+      color: #6B1F1F;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0.75rem;
     }
 
     .reply-body {
@@ -173,6 +204,22 @@
       line-height: 1.65;
       color: #111;
     }
+
+    /* ADMIN PIN BUTTON */
+    .btn-pin {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #6B1F1F;
+      background: transparent;
+      border: 0.5px solid #6B1F1F;
+      border-radius: 4px;
+      padding: 3px 8px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .btn-pin:hover { background: #fdf0f0; }
+    .btn-pin.pinned { background: #6B1F1F; color: #fff; }
 
     .reply-box { margin-top: 2.5rem; }
 
@@ -196,13 +243,13 @@
       margin-bottom: 0.75rem;
     }
 
-    .reply-box textarea:focus { border-color: #000; }
+    .reply-box textarea:focus { border-color: #6B1F1F; }
 
     .btn-reply {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 500;
-      background: #000;
+      background: #6B1F1F;
       color: #fff;
       border: none;
       border-radius: 6px;
@@ -210,7 +257,7 @@
       cursor: pointer;
     }
 
-    .btn-reply:hover { opacity: 0.7; }
+    .btn-reply:hover { opacity: 0.8; }
 
     .empty-replies {
       font-size: 13px;
@@ -224,9 +271,12 @@
       margin-top: 1rem;
     }
 
-    .login-prompt a {
-      color: #000;
-      text-decoration: underline;
+    .login-prompt a { color: #000; text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .container { padding: 1.5rem 1rem; }
+      .post-title { font-size: 20px; }
+      nav { padding: 0.8rem 1rem; }
     }
   </style>
 </head>
@@ -249,12 +299,28 @@
 
 <script>
   let currentUser = null
+  let isExpert = false
+  let isAdmin = false
   const postId = new URLSearchParams(window.location.search).get('id')
 
   async function initAuth() {
     const { data: { session } } = await db.auth.getSession()
     if (session) {
       currentUser = session.user
+
+      // Check if expert or admin
+      const { data: profile } = await db
+        .from('profiles')
+        .select('is_expert, username')
+        .eq('id', currentUser.id)
+        .single()
+
+      if (profile) {
+        isExpert = profile.is_expert || false
+        // Admin = you, by email
+        isAdmin = session.user.email === 'teerthagandhi@gmail.com'
+      }
+
       document.getElementById('nav-auth').innerHTML = `
         <div class="profile-menu">
           <button class="btn-small" onclick="toggleProfileMenu()">Profile</button>
@@ -306,43 +372,90 @@
   async function loadReplies() {
     const { data: replies } = await db
       .from('replies')
-      .select('*, profiles(username)')
+      .select('*, profiles(username, is_expert)')
       .eq('post_id', postId)
       .order('created_at', { ascending: true })
 
     const section = document.getElementById('replies-section')
 
-    const repliesHTML = replies && replies.length > 0
-      ? replies.map(r => `
-          <div class="reply-item">
-            <div class="reply-meta">
-              <span>${r.profiles?.username || 'Anonymous'}</span>
-              <span>·</span>
-              <span>${timeAgo(r.created_at)}</span>
-            </div>
-            <div class="reply-body">${r.body}</div>
-          </div>
-        `).join('')
-      : '<p class="empty-replies">No replies yet. Be the first.</p>'
+    if (!replies || replies.length === 0) {
+      const replyBox = buildReplyBox()
+      section.innerHTML = `
+        <div class="replies-header">0 Replies</div>
+        <p class="empty-replies">No replies yet. Be the first.</p>
+        ${replyBox}
+      `
+      return
+    }
 
-    const replyBox = currentUser
-      ? `<div class="reply-box">
-           <h3>Write a reply</h3>
-           <textarea id="reply-body" placeholder="Your reply..."></textarea>
-           <button class="btn-reply" onclick="submitReply()">Post reply</button>
-         </div>`
-      : `<p class="login-prompt"><a href="login.html">Log in</a> to reply.</p>`
+    // Separate pinned and regular replies
+    const pinned = replies.filter(r => r.is_pinned)
+    const regular = replies.filter(r => !r.is_pinned)
 
-    section.innerHTML = `
-      <div class="replies-header">${replies?.length || 0} Replies</div>
-      ${repliesHTML}
-      ${replyBox}
+    let html = `<div class="replies-header">${replies.length} ${replies.length === 1 ? 'Reply' : 'Replies'}</div>`
+
+    // Pinned expert reply first
+    if (pinned.length > 0) {
+      pinned.forEach(r => {
+        html += buildReplyHTML(r, true)
+      })
+    }
+
+    // Regular replies
+    regular.forEach(r => {
+      html += buildReplyHTML(r, false)
+    })
+
+    html += buildReplyBox()
+    section.innerHTML = html
+  }
+
+  function buildReplyHTML(r, isPinned) {
+    const expertBadge = r.profiles?.is_expert ? `<span class="expert-badge">Expert</span>` : ''
+    const pinnedLabel = isPinned ? `<div class="pinned-label">📌 Expert answer</div>` : ''
+    const pinBtn = isAdmin
+      ? `<button class="btn-pin ${isPinned ? 'pinned' : ''}" onclick="togglePin(${r.id}, ${isPinned})">${isPinned ? 'Unpin' : 'Pin as expert'}</button>`
+      : ''
+
+    return `
+      <div class="reply-item ${isPinned ? 'expert-reply' : ''}">
+        ${pinnedLabel}
+        <div class="reply-meta">
+          <span>${r.profiles?.username || 'Anonymous'}</span>
+          ${expertBadge}
+          <span>·</span>
+          <span>${timeAgo(r.created_at)}</span>
+          ${pinBtn}
+        </div>
+        <div class="reply-body">${r.body}</div>
+      </div>
     `
+  }
+
+  function buildReplyBox() {
+    if (currentUser) {
+      return `<div class="reply-box">
+        <h3>Write a reply</h3>
+        <textarea id="reply-body" placeholder="Your reply..."></textarea>
+        <button class="btn-reply" onclick="submitReply()">Post reply</button>
+      </div>`
+    }
+    return `<p class="login-prompt"><a href="login.html">Log in</a> to reply.</p>`
+  }
+
+  async function togglePin(replyId, currentlyPinned) {
+    const { error } = await db
+      .from('replies')
+      .update({ is_pinned: !currentlyPinned })
+      .eq('id', replyId)
+
+    if (!error) loadReplies()
   }
 
   async function submitReply() {
     const body = document.getElementById('reply-body').value.trim()
     if (!body) return
+    if (body.length < 5) { alert('Reply too short.'); return; }
 
     const { error } = await db.from('replies').insert({
       body,
@@ -362,9 +475,10 @@
     return `${Math.floor(diff/86400)}d ago`
   }
 
-  initAuth()
-  loadPost()
-  loadReplies()
+  initAuth().then(() => {
+    loadPost()
+    loadReplies()
+  })
 </script>
 
 </body>
