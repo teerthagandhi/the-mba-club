@@ -60,12 +60,61 @@
     .btn-small:hover { opacity: 0.7; }
 
     .container {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 2.5rem 2rem;
+      padding: 2rem 2rem;
       display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 3rem;
+      grid-template-columns: 160px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        border-bottom: 0.5px solid #e0e0e0;
+        padding-bottom: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .all-link {
+        margin-bottom: 0;
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 0.5px solid #ccc;
+        border-radius: 99px;
+      }
+
+      .category-group {
+        margin-bottom: 0;
+      }
+
+      .category-group-header {
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 0.5px solid #ccc;
+        border-radius: 99px;
+      }
+
+      .subcategory-list {
+        display: none !important;
+      }
+
+      .chevron { display: none; }
+
+      nav {
+        padding: 0.8rem 1rem;
+      }
+
+      .nav-logo { font-size: 14px; }
     }
 
     /* SIDEBAR */
