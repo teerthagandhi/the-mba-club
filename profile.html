@@ -33,6 +33,12 @@
       letter-spacing: -0.5px;
     }
 
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
     .btn-small {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
@@ -47,16 +53,54 @@
 
     .btn-small:hover { opacity: 0.7; }
 
+    .profile-menu { position: relative; }
+
+    .profile-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: #fff;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+
+    .dropdown-email {
+      font-size: 11px;
+      color: #999;
+      padding: 6px 10px;
+      border-bottom: 0.5px solid #f0f0f0;
+      margin-bottom: 4px;
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #000;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover { background: #f5f5f5; }
+    .hidden { display: none; }
+
     .container {
       max-width: 620px;
       margin: 0 auto;
       padding: 3rem 2rem;
     }
 
-    /* HEADER */
-    .profile-header {
-      margin-bottom: 3rem;
-    }
+    .profile-header { margin-bottom: 3rem; }
 
     .profile-name {
       font-size: 28px;
@@ -71,7 +115,6 @@
       margin-bottom: 1.5rem;
     }
 
-    /* PROGRESS */
     .progress-bar-wrap {
       background: #f0f0f0;
       border-radius: 99px;
@@ -87,12 +130,8 @@
       transition: width 0.4s ease;
     }
 
-    .progress-label {
-      font-size: 11px;
-      color: #999;
-    }
+    .progress-label { font-size: 11px; color: #999; }
 
-    /* SECTIONS */
     .section {
       border-top: 0.5px solid #e0e0e0;
       padding: 1.75rem 0;
@@ -123,7 +162,6 @@
 
     .btn-edit:hover { color: #000; }
 
-    /* FORM */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -163,7 +201,6 @@
 
     .field textarea { min-height: 80px; resize: vertical; }
 
-    /* DISPLAY MODE */
     .display-row {
       display: flex;
       flex-direction: column;
@@ -171,15 +208,8 @@
       margin-bottom: 0.75rem;
     }
 
-    .display-label {
-      font-size: 11px;
-      color: #999;
-    }
-
-    .display-value {
-      font-size: 14px;
-      color: #000;
-    }
+    .display-label { font-size: 11px; color: #999; }
+    .display-value { font-size: 14px; color: #000; }
 
     .display-empty {
       font-size: 13px;
@@ -187,7 +217,6 @@
       font-style: italic;
     }
 
-    /* EXAM TAGS */
     .exam-tags {
       display: flex;
       flex-wrap: wrap;
@@ -212,7 +241,6 @@
       border-color: #000;
     }
 
-    /* SAVE */
     .btn-save {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
@@ -234,19 +262,25 @@
       margin-top: 0.5rem;
     }
 
-    .hidden { display: none; }
+    .error-msg {
+      font-size: 12px;
+      color: red;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html" class="nav-logo">The MBA Club</a>
-  <a href="forum.html" class="btn-small">Forum</a>
+  <div class="nav-right">
+    <a href="forum.html" class="btn-small">Forum</a>
+    <div id="nav-auth"></div>
+  </div>
 </nav>
 
 <div class="container">
 
-  <!-- HEADER -->
   <div class="profile-header">
     <div class="profile-name" id="display-name">Your Profile</div>
     <div class="profile-meta" id="display-meta">Complete your profile</div>
@@ -257,13 +291,11 @@
   </div>
 
   <!-- SECTION 1: BASIC -->
-  <div class="section" id="section-basic">
+  <div class="section">
     <div class="section-header">
       <span class="section-title">Basic info</span>
       <button class="btn-edit" onclick="toggleEdit('basic')">Edit</button>
     </div>
-
-    <!-- DISPLAY -->
     <div id="basic-display">
       <div class="display-row">
         <span class="display-label">Name</span>
@@ -282,8 +314,6 @@
         <span class="display-value" id="d-type"><span class="display-empty">Not filled</span></span>
       </div>
     </div>
-
-    <!-- EDIT -->
     <div id="basic-edit" class="hidden">
       <div class="form-grid">
         <div class="field">
@@ -292,7 +322,7 @@
         </div>
         <div class="field">
           <label>Age</label>
-          <input type="number" id="f-age" placeholder="21" />
+          <input type="number" id="f-age" placeholder="21" min="15" max="45" />
         </div>
         <div class="field">
           <label>City</label>
@@ -313,11 +343,11 @@
         </div>
         <div class="field">
           <label>Phone number</label>
-          <input type="tel" id="f-phone" placeholder="98XXXXXXXX" />
+          <input type="tel" id="f-phone" placeholder="98XXXXXXXX" maxlength="10" />
         </div>
       </div>
       <button class="btn-save" onclick="saveBasic()">Save</button>
-      <div class="save-msg" id="basic-msg"></div>
+      <div id="basic-msg" class="save-msg"></div>
     </div>
   </div>
 
@@ -327,7 +357,6 @@
       <span class="section-title">Education</span>
       <button class="btn-edit" onclick="toggleEdit('edu')">Edit</button>
     </div>
-
     <div id="edu-display">
       <div class="display-row">
         <span class="display-label">Degree</span>
@@ -342,7 +371,6 @@
         <span class="display-value" id="d-gradyear"><span class="display-empty">Not filled</span></span>
       </div>
     </div>
-
     <div id="edu-edit" class="hidden">
       <div class="form-grid">
         <div class="field">
@@ -351,15 +379,17 @@
         </div>
         <div class="field">
           <label>Graduation year</label>
-          <input type="number" id="f-gradyear" placeholder="2027" />
+          <input type="number" id="f-gradyear" placeholder="2027" min="2000" max="2035" />
         </div>
-        <div class="field form-grid single">
+      </div>
+      <div class="form-grid single" style="margin-top:0.75rem">
+        <div class="field">
           <label>College</label>
           <input type="text" id="f-college" placeholder="IIT Bombay" />
         </div>
       </div>
       <button class="btn-save" onclick="saveEdu()">Save</button>
-      <div class="save-msg" id="edu-msg"></div>
+      <div id="edu-msg" class="save-msg"></div>
     </div>
   </div>
 
@@ -369,7 +399,6 @@
       <span class="section-title">Exams</span>
       <button class="btn-edit" onclick="toggleEdit('exams')">Edit</button>
     </div>
-
     <div id="exams-display">
       <div class="display-row">
         <span class="display-label">Exams</span>
@@ -380,10 +409,9 @@
         <span class="display-value" id="d-scores"><span class="display-empty">Not filled</span></span>
       </div>
     </div>
-
     <div id="exams-edit" class="hidden">
       <div style="margin-bottom:1rem">
-        <div class="display-label" style="margin-bottom:8px">Which exams? (select all that apply)</div>
+        <div class="display-label" style="margin-bottom:8px">Which exams?</div>
         <div class="exam-tags">
           <button class="exam-tag" onclick="toggleExam(this)">CAT</button>
           <button class="exam-tag" onclick="toggleExam(this)">GMAT</button>
@@ -399,7 +427,7 @@
           <label>Scores / percentile (e.g. CAT 2024 — 97.4%ile)</label>
           <textarea id="f-scores" placeholder="CAT 2024 — 97.4%ile&#10;GMAT — 720"></textarea>
         </div>
-        <div class="field">
+        <div class="field" style="margin-top:0.75rem">
           <label>Planning to give CAT in</label>
           <select id="f-catyear">
             <option value="">Select year</option>
@@ -411,7 +439,7 @@
         </div>
       </div>
       <button class="btn-save" onclick="saveExams()">Save</button>
-      <div class="save-msg" id="exams-msg"></div>
+      <div id="exams-msg" class="save-msg"></div>
     </div>
   </div>
 
@@ -421,13 +449,11 @@
       <span class="section-title">Target colleges</span>
       <button class="btn-edit" onclick="toggleEdit('target')">Edit</button>
     </div>
-
     <div id="target-display">
       <div class="display-row">
         <span class="display-value" id="d-targets"><span class="display-empty">Not filled</span></span>
       </div>
     </div>
-
     <div id="target-edit" class="hidden">
       <div class="form-grid single">
         <div class="field">
@@ -436,7 +462,7 @@
         </div>
       </div>
       <button class="btn-save" onclick="saveTargets()">Save</button>
-      <div class="save-msg" id="target-msg"></div>
+      <div id="target-msg" class="save-msg"></div>
     </div>
   </div>
 
@@ -452,6 +478,18 @@
     if (!session) { window.location.href = 'login.html'; return; }
     currentUser = session.user
 
+    // Render nav
+    document.getElementById('nav-auth').innerHTML = `
+      <div class="profile-menu">
+        <button class="btn-small" onclick="toggleProfileMenu()">Profile</button>
+        <div class="profile-dropdown hidden" id="profile-dropdown">
+          <div class="dropdown-email">${session.user.email}</div>
+          <a href="profile.html" class="dropdown-item">My profile</a>
+          <button class="dropdown-item" onclick="logout()">Log out</button>
+        </div>
+      </div>
+    `
+
     const { data } = await db
       .from('profiles')
       .select('*')
@@ -464,30 +502,30 @@
     }
   }
 
+  async function logout() {
+    await db.auth.signOut()
+    window.location.href = 'login.html'
+  }
+
+  function toggleProfileMenu() {
+    document.getElementById('profile-dropdown').classList.toggle('hidden')
+  }
+
   function renderProfile() {
-    // Header
     document.getElementById('display-name').textContent = profile.full_name || profile.username || 'Your Profile'
     document.getElementById('display-meta').textContent = profile.city ? `${profile.city}, ${profile.state || ''}` : 'Complete your profile'
 
-    // Basic
     setText('d-name', profile.full_name)
     setText('d-location', profile.city ? `${profile.city}, ${profile.state}` : null)
     setText('d-age', profile.age)
     setText('d-type', profile.user_type)
-
-    // Education
     setText('d-degree', profile.degree)
     setText('d-college', profile.college)
     setText('d-gradyear', profile.graduation_year)
-
-    // Exams
     setText('d-exams', profile.exams)
     setText('d-scores', profile.exam_scores)
-
-    // Targets
     setText('d-targets', profile.target_colleges)
 
-    // Progress
     updateProgress()
   }
 
@@ -516,7 +554,6 @@
     const display = document.getElementById(`${section}-display`)
     const edit = document.getElementById(`${section}-edit`)
     const isHidden = edit.classList.contains('hidden')
-
     if (isHidden) {
       edit.classList.remove('hidden')
       display.classList.add('hidden')
@@ -544,12 +581,10 @@
     if (section === 'exams') {
       document.getElementById('f-scores').value = profile.exam_scores || ''
       document.getElementById('f-catyear').value = profile.cat_year || ''
-      if (profile.exams) {
-        selectedExams = profile.exams.split(', ')
-        document.querySelectorAll('.exam-tag').forEach(tag => {
-          if (selectedExams.includes(tag.textContent)) tag.classList.add('selected')
-        })
-      }
+      selectedExams = profile.exams ? profile.exams.split(', ') : []
+      document.querySelectorAll('.exam-tag').forEach(tag => {
+        tag.classList.toggle('selected', selectedExams.includes(tag.textContent))
+      })
     }
     if (section === 'target') {
       document.getElementById('f-targets').value = profile.target_colleges || ''
@@ -562,40 +597,57 @@
   }
 
   async function saveBasic() {
-    const updates = {
-      full_name: document.getElementById('f-name').value.trim(),
-      age: document.getElementById('f-age').value,
-      city: document.getElementById('f-city').value.trim(),
-      state: document.getElementById('f-state').value.trim(),
-      user_type: document.getElementById('f-type').value,
-      phone: document.getElementById('f-phone').value.trim(),
-    }
-    await save(updates, 'basic-msg')
+    const name = document.getElementById('f-name').value.trim()
+    const age = parseInt(document.getElementById('f-age').value)
+    const city = document.getElementById('f-city').value.trim()
+    const state = document.getElementById('f-state').value.trim()
+    const phone = document.getElementById('f-phone').value.trim()
+    const msg = document.getElementById('basic-msg')
+
+    if (name && name.length < 2) { msg.textContent = 'Name must be at least 2 characters.'; msg.className = 'error-msg'; return; }
+    if (age && (age < 15 || age > 45)) { msg.textContent = 'Enter a valid age (15–45).'; msg.className = 'error-msg'; return; }
+    if (phone && !/^\d{10}$/.test(phone)) { msg.textContent = 'Phone must be exactly 10 digits.'; msg.className = 'error-msg'; return; }
+    if (city && city.length < 2) { msg.textContent = 'Enter a valid city name.'; msg.className = 'error-msg'; return; }
+
+    msg.className = 'save-msg'
+    await save({
+      full_name: name || null,
+      age: age || null,
+      city: city || null,
+      state: state || null,
+      user_type: document.getElementById('f-type').value || null,
+      phone: phone || null,
+    }, 'basic-msg')
   }
 
   async function saveEdu() {
-    const updates = {
-      degree: document.getElementById('f-degree').value.trim(),
-      graduation_year: document.getElementById('f-gradyear').value,
-      college: document.getElementById('f-college').value.trim(),
-    }
-    await save(updates, 'edu-msg')
+    const degree = document.getElementById('f-degree').value.trim()
+    const gradyear = parseInt(document.getElementById('f-gradyear').value)
+    const college = document.getElementById('f-college').value.trim()
+    const msg = document.getElementById('edu-msg')
+
+    if (gradyear && (gradyear < 2000 || gradyear > 2035)) { msg.textContent = 'Enter a valid graduation year.'; msg.className = 'error-msg'; return; }
+
+    msg.className = 'save-msg'
+    await save({
+      degree: degree || null,
+      graduation_year: gradyear || null,
+      college: college || null,
+    }, 'edu-msg')
   }
 
   async function saveExams() {
-    const updates = {
-      exams: selectedExams.join(', '),
-      exam_scores: document.getElementById('f-scores').value.trim(),
-      cat_year: document.getElementById('f-catyear').value,
-    }
-    await save(updates, 'exams-msg')
+    await save({
+      exams: selectedExams.length ? selectedExams.join(', ') : null,
+      exam_scores: document.getElementById('f-scores').value.trim() || null,
+      cat_year: document.getElementById('f-catyear').value || null,
+    }, 'exams-msg')
   }
 
   async function saveTargets() {
-    const updates = {
-      target_colleges: document.getElementById('f-targets').value.trim(),
-    }
-    await save(updates, 'target-msg')
+    await save({
+      target_colleges: document.getElementById('f-targets').value.trim() || null,
+    }, 'target-msg')
   }
 
   async function save(updates, msgId) {
@@ -607,13 +659,14 @@
     const msg = document.getElementById(msgId)
     if (error) {
       msg.textContent = 'Error saving. Try again.'
+      msg.className = 'error-msg'
     } else {
       profile = { ...profile, ...updates }
       renderProfile()
       msg.textContent = 'Saved.'
-      setTimeout(() => {
-        msg.textContent = ''
-      }, 2000)
+      msg.className = 'save-msg'
+      setTimeout(() => { msg.textContent = '' }, 2000)
+      toggleEdit(msgId.replace('-msg', ''))
     }
   }
 
