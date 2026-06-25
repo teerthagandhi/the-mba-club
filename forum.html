@@ -110,6 +110,12 @@
 
       .chevron { display: none; }
 
+      .category-group-header.active {
+        background: #6B1F1F;
+        color: #fff;
+        border-color: #6B1F1F;
+      }
+
       nav {
         padding: 0.8rem 1rem;
       }
@@ -368,6 +374,76 @@
 
     .dropdown-item:hover { background: #f5f5f5; }
     .hidden { display: none; }
+
+    /* BOTTOM SHEET */
+    .bottom-sheet-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 200;
+    }
+
+    .bottom-sheet-overlay.open { display: block; }
+
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem 1.5rem 2.5rem;
+      z-index: 201;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .bottom-sheet-overlay.open .bottom-sheet {
+      transform: translateY(0);
+    }
+
+    .bottom-sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 99px;
+      margin: 0 auto 1.2rem;
+    }
+
+    .bottom-sheet-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    .sheet-options {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sheet-option {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #333;
+      background: transparent;
+      border: none;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .sheet-option:hover { background: #f5f5f5; }
+    .sheet-option.active { background: #fdf0f0; color: #6B1F1F; font-weight: 500; }
+    .sheet-option.all-option { font-weight: 600; border-bottom: 0.5px solid #f0f0f0; margin-bottom: 4px; padding-bottom: 12px; }
+
   </style>
 </head>
 <body>
@@ -396,6 +472,16 @@
       <div class="empty-state">Loading...</div>
     </div>
   </main>
+</div>
+
+
+<!-- BOTTOM SHEET -->
+<div class="bottom-sheet-overlay" id="bottom-sheet-overlay" onclick="closeBottomSheet(event)">
+  <div class="bottom-sheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-title" id="sheet-title">Select</div>
+    <div class="sheet-options" id="sheet-options"></div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -496,6 +582,14 @@
   }
 
   function toggleGroup(parentId, headerEl) {
+    const isMobile = window.innerWidth <= 700
+    const parentName = allCategories.find(c => c.id === parentId)?.name || ''
+
+    if (isMobile) {
+      openBottomSheet(parentId, parentName)
+      return
+    }
+
     const group = document.getElementById(`group-${parentId}`)
     const isOpen = group.classList.contains('open')
 
@@ -504,13 +598,11 @@
       headerEl.classList.remove('active')
     } else {
       group.classList.add('open')
-      // Filter by parent (show all posts in this group)
       clearActiveStates()
       headerEl.classList.add('active')
       currentCategoryId = null
       currentParentId = parentId
-      const parentName = allCategories.find(c => c.id === parentId)?.name
-      document.getElementById('current-category').textContent = parentName || 'All Discussions'
+      document.getElementById('current-category').textContent = parentName
       loadPosts()
     }
   }
@@ -637,6 +729,59 @@
 
     closeModal()
     loadPosts()
+  }
+
+
+  function openBottomSheet(parentId, parentName) {
+    const children = allCategories.filter(c => c.parent_id === parentId)
+    const options = document.getElementById('sheet-options')
+    const title = document.getElementById('sheet-title')
+
+    title.textContent = parentName
+    options.innerHTML = ''
+
+    // All option
+    const allBtn = document.createElement('button')
+    allBtn.className = 'sheet-option all-option'
+    allBtn.textContent = 'All ' + parentName
+    allBtn.onclick = () => {
+      clearActiveStates()
+      document.getElementById('all-link').classList.remove('active')
+      // Mark parent as active on mobile
+      const mobileHeader = document.querySelector(`#group-${parentId} .category-group-header`)
+      if (mobileHeader) mobileHeader.classList.add('active')
+      currentCategoryId = null
+      currentParentId = parentId
+      document.getElementById('current-category').textContent = parentName
+      loadPosts()
+      closeBottomSheet()
+    }
+    options.appendChild(allBtn)
+
+    children.forEach(child => {
+      const btn = document.createElement('button')
+      btn.className = 'sheet-option'
+      btn.textContent = child.name
+      btn.onclick = () => {
+        clearActiveStates()
+        const mobileHeader = document.querySelector(`#group-${parentId} .category-group-header`)
+        if (mobileHeader) mobileHeader.classList.add('active')
+        currentCategoryId = child.id
+        currentParentId = null
+        document.getElementById('current-category').textContent = child.name
+        loadPosts()
+        closeBottomSheet()
+      }
+      options.appendChild(btn)
+    })
+
+    document.getElementById('bottom-sheet-overlay').classList.add('open')
+  }
+
+  function closeBottomSheet(e) {
+    if (!e || e.target === document.getElementById('bottom-sheet-overlay')) {
+      document.getElementById('bottom-sheet-overlay').classList.remove('open')
+    }
   }
 
   function timeAgo(dateStr) {
