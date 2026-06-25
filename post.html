@@ -53,6 +53,47 @@
 
     .btn-small:hover { opacity: 0.7; }
 
+    .profile-menu { position: relative; }
+
+    .profile-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: #fff;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+
+    .dropdown-email {
+      font-size: 11px;
+      color: #999;
+      padding: 6px 10px;
+      border-bottom: 0.5px solid #f0f0f0;
+      margin-bottom: 4px;
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #000;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover { background: #f5f5f5; }
+    .hidden { display: none; }
+
     .container {
       max-width: 680px;
       margin: 0 auto;
@@ -133,9 +174,7 @@
       color: #111;
     }
 
-    .reply-box {
-      margin-top: 2.5rem;
-    }
+    .reply-box { margin-top: 2.5rem; }
 
     .reply-box h3 {
       font-size: 14px;
@@ -196,9 +235,9 @@
 <nav>
   <a href="index.html" class="nav-logo">The MBA Club</a>
   <div class="nav-right">
-    <span id="nav-user" style="font-size:12px;color:#999"></span>
-    <a href="profile.html" class="btn-small">Profile</a>
-    <a href="login.html" class="btn-small" id="btn-login">Log in</a>
+    <div id="nav-auth">
+      <a href="login.html" class="btn-small">Log in</a>
+    </div>
   </div>
 </nav>
 
@@ -216,13 +255,26 @@
     const { data: { session } } = await db.auth.getSession()
     if (session) {
       currentUser = session.user
-      document.getElementById('nav-user').textContent = session.user.email
-      document.getElementById('btn-login').textContent = 'Log out'
-      document.getElementById('btn-login').onclick = async () => {
-        await db.auth.signOut()
-        window.location.reload()
-      }
+      document.getElementById('nav-auth').innerHTML = `
+        <div class="profile-menu">
+          <button class="btn-small" onclick="toggleProfileMenu()">Profile</button>
+          <div class="profile-dropdown hidden" id="profile-dropdown">
+            <div class="dropdown-email">${session.user.email}</div>
+            <a href="profile.html" class="dropdown-item">My profile</a>
+            <button class="dropdown-item" onclick="logout()">Log out</button>
+          </div>
+        </div>
+      `
     }
+  }
+
+  async function logout() {
+    await db.auth.signOut()
+    window.location.reload()
+  }
+
+  function toggleProfileMenu() {
+    document.getElementById('profile-dropdown').classList.toggle('hidden')
   }
 
   async function loadPost() {
@@ -316,4 +368,4 @@
 </script>
 
 </body>
-</html>n
+</html>
