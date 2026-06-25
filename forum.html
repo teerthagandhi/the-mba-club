@@ -17,7 +17,6 @@
       min-height: 100vh;
     }
 
-    /* NAV */
     nav {
       border-bottom: 0.5px solid #e0e0e0;
       padding: 1rem 2rem;
@@ -53,50 +52,80 @@
     }
 
     .btn-small.filled {
-      background: #000;
+      background: #6B1F1F;
       color: #fff;
+      border-color: #6B1F1F;
     }
 
     .btn-small:hover { opacity: 0.7; }
 
-    /* LAYOUT */
     .container {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 2.5rem 2rem;
       display: grid;
-      grid-template-columns: 200px 1fr;
+      grid-template-columns: 220px 1fr;
       gap: 3rem;
     }
 
     /* SIDEBAR */
-    .sidebar h3 {
-      font-size: 11px;
+    .sidebar-label {
+      font-size: 10px;
       font-weight: 500;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 0.5rem;
+      padding: 0 6px;
+    }
+
+    .category-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .category-group-title {
+      font-size: 11px;
+      font-weight: 600;
       color: #999;
-      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
+      margin-bottom: 2px;
     }
 
     .category-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
     }
 
     .category-list li a {
       display: block;
       font-size: 13px;
-      color: #333;
+      color: #444;
       text-decoration: none;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 5px 8px;
+      border-radius: 5px;
+      transition: background 0.1s;
     }
 
     .category-list li a:hover { background: #f5f5f5; }
-    .category-list li a.active { background: #000; color: #fff; }
+    .category-list li a.active { background: #6B1F1F; color: #fff; }
+
+    .all-link {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #000;
+      text-decoration: none;
+      padding: 5px 8px;
+      border-radius: 5px;
+      margin-bottom: 1.5rem;
+    }
+
+    .all-link:hover { background: #f5f5f5; }
+    .all-link.active { background: #6B1F1F; color: #fff; }
 
     /* MAIN */
     .main-header {
@@ -112,11 +141,9 @@
       letter-spacing: -0.5px;
     }
 
-    /* POSTS */
     .post-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
     }
 
     .post-item {
@@ -128,23 +155,25 @@
     }
 
     .post-item:last-child { border-bottom: 0.5px solid #e0e0e0; }
-    .post-item:hover .post-title { opacity: 0.6; }
+    .post-item:hover .post-title { color: #6B1F1F; }
 
     .post-meta {
       font-size: 11px;
       color: #999;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .post-category-tag {
-      background: #f0f0f0;
-      color: #555;
+      background: #fdf0f0;
+      color: #6B1F1F;
       padding: 2px 8px;
       border-radius: 4px;
       font-size: 10px;
+      font-weight: 500;
     }
 
     .post-title {
@@ -152,7 +181,7 @@
       font-weight: 600;
       letter-spacing: -0.2px;
       margin-bottom: 4px;
-      transition: opacity 0.15s;
+      transition: color 0.15s;
     }
 
     .post-body-preview {
@@ -162,6 +191,21 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
+    .post-footer {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .reply-count {
+      font-size: 11px;
+      color: #bbb;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .empty-state {
@@ -171,12 +215,12 @@
       font-size: 14px;
     }
 
-    /* NEW POST MODAL */
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.35);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -215,7 +259,7 @@
     }
 
     .modal textarea { min-height: 120px; resize: vertical; }
-    .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: #000; }
+    .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: #6B1F1F; }
 
     .modal-actions {
       display: flex;
@@ -223,71 +267,72 @@
       gap: 8px;
     }
 
-    .profile-menu {
-  position: relative;
-}
+    /* DROPDOWN */
+    .profile-menu { position: relative; }
 
-.profile-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  background: #fff;
-  border: 0.5px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0.5rem;
-  min-width: 180px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  z-index: 100;
-}
+    .profile-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: #fff;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
 
-.dropdown-email {
-  font-size: 11px;
-  color: #999;
-  padding: 6px 10px;
-  border-bottom: 0.5px solid #f0f0f0;
-  margin-bottom: 4px;
-}
+    .dropdown-email {
+      font-size: 11px;
+      color: #999;
+      padding: 6px 10px;
+      border-bottom: 0.5px solid #f0f0f0;
+      margin-bottom: 4px;
+    }
 
-.dropdown-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: #000;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  padding: 7px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #000;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-.dropdown-item:hover { background: #f5f5f5; }
-.hidden { display: none; }
+    .dropdown-item:hover { background: #f5f5f5; }
+    .hidden { display: none; }
 
+    /* MODAL CATEGORY SELECT */
+    .modal-select-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
   </style>
 </head>
 <body>
 
-
 <nav>
   <a href="index.html" class="nav-logo">The MBA Club</a>
   <div class="nav-right">
-    <button class="btn-small filled" id="btn-new-post" onclick="openModal()">+ New Post</button>
+    <button class="btn-small filled" onclick="openModal()">+ New Post</button>
     <div id="nav-auth">
-      <a href="login.html" class="btn-small" id="btn-login">Log in</a>
+      <a href="login.html" class="btn-small">Log in</a>
     </div>
   </div>
 </nav>
 
-
 <div class="container">
   <aside class="sidebar">
-    <h3>Categories</h3>
-    <ul class="category-list" id="category-list">
-      <li><a href="#" class="active" onclick="filterCategory(null, this)">All</a></li>
-    </ul>
+    <a href="#" class="all-link active" id="all-link" onclick="filterCategory(null, this)">All Discussions</a>
+    <div id="category-sidebar"></div>
   </aside>
 
   <main>
@@ -300,13 +345,18 @@
   </main>
 </div>
 
-<!-- NEW POST MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3>New Post</h3>
-    <select id="post-category">
-      <option value="">Select a category</option>
-    </select>
+    <div class="modal-select-group">
+      <select id="post-parent-category" onchange="filterSubcategories()">
+        <option value="">Topic area</option>
+      </select>
+      <select id="post-category">
+        <option value="">Subcategory</option>
+      </select>
+    </div>
     <input type="text" id="post-title" placeholder="Title" />
     <textarea id="post-body" placeholder="What's on your mind?"></textarea>
     <div class="modal-actions">
@@ -319,70 +369,112 @@
 <script>
   let currentUser = null
   let currentCategoryId = null
+  let allCategories = []
 
-  // Auth state
   async function initAuth() {
-  const { data: { session } } = await db.auth.getSession()
-  if (session) {
-    currentUser = session.user
-    document.getElementById('nav-auth').innerHTML = `
-      <div class="profile-menu">
-        <button class="btn-small" onclick="toggleProfileMenu()">Profile</button>
-        <div class="profile-dropdown hidden" id="profile-dropdown">
-          <div class="dropdown-email">${session.user.email}</div>
-          <a href="profile.html" class="dropdown-item">My profile</a>
-          <button class="dropdown-item" onclick="logout()">Log out</button>
+    const { data: { session } } = await db.auth.getSession()
+    if (session) {
+      currentUser = session.user
+      document.getElementById('nav-auth').innerHTML = `
+        <div class="profile-menu">
+          <button class="btn-small" onclick="toggleProfileMenu()">Profile</button>
+          <div class="profile-dropdown hidden" id="profile-dropdown">
+            <div class="dropdown-email">${session.user.email}</div>
+            <a href="profile.html" class="dropdown-item">My profile</a>
+            <button class="dropdown-item" onclick="logout()">Log out</button>
+          </div>
         </div>
-      </div>
-    `
+      `
+    }
   }
-}
 
-async function logout() {
-  await db.auth.signOut()
-  window.location.reload()
-}
+  async function logout() {
+    await db.auth.signOut()
+    window.location.reload()
+  }
 
-function toggleProfileMenu() {
-  document.getElementById('profile-dropdown').classList.toggle('hidden')
-}
+  function toggleProfileMenu() {
+    document.getElementById('profile-dropdown').classList.toggle('hidden')
+  }
 
-
-
-  // Load categories
   async function loadCategories() {
     const { data } = await db.from('categories').select('*').order('id')
-    const list = document.getElementById('category-list')
-    const select = document.getElementById('post-category')
+    allCategories = data || []
 
-    data.forEach(cat => {
-      const li = document.createElement('li')
-      li.innerHTML = `<a href="#" onclick="filterCategory(${cat.id}, this)">${cat.name}</a>`
-      list.appendChild(li)
+    const parents = allCategories.filter(c => !c.parent_id)
+    const sidebar = document.getElementById('category-sidebar')
+    const parentSelect = document.getElementById('post-parent-category')
 
+    parents.forEach(parent => {
+      const children = allCategories.filter(c => c.parent_id === parent.id)
+
+      // Sidebar group
+      const group = document.createElement('div')
+      group.className = 'category-group'
+      group.innerHTML = `<div class="category-group-title">${parent.name}</div>`
+      const ul = document.createElement('ul')
+      ul.className = 'category-list'
+
+      children.forEach(child => {
+        const li = document.createElement('li')
+        li.innerHTML = `<a href="#" onclick="filterCategory(${child.id}, this)">${child.name}</a>`
+        ul.appendChild(li)
+      })
+
+      group.appendChild(ul)
+      sidebar.appendChild(group)
+
+      // Modal parent select
       const opt = document.createElement('option')
-      opt.value = cat.id
-      opt.textContent = cat.name
-      select.appendChild(opt)
+      opt.value = parent.id
+      opt.textContent = parent.name
+      parentSelect.appendChild(opt)
     })
   }
 
-  // Load posts
+  function filterSubcategories() {
+    const parentId = parseInt(document.getElementById('post-parent-category').value)
+    const subSelect = document.getElementById('post-category')
+    subSelect.innerHTML = '<option value="">Subcategory</option>'
+
+    const children = allCategories.filter(c => c.parent_id === parentId)
+    children.forEach(child => {
+      const opt = document.createElement('option')
+      opt.value = child.id
+      opt.textContent = child.name
+      subSelect.appendChild(opt)
+    })
+  }
+
   async function loadPosts(categoryId = null) {
     let query = db
       .from('posts')
-      .select('*, profiles(username), categories(name)')
+      .select('*, profiles(username), categories(name, parent_id)')
       .order('created_at', { ascending: false })
 
-    if (categoryId) query = query.eq('category_id', categoryId)
+    if (categoryId) {
+      query = query.eq('category_id', categoryId)
+    }
 
-    const { data, error } = await query
+    const { data } = await query
     const list = document.getElementById('post-list')
 
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty-state">No posts yet. Be the first to post.</div>'
       return
     }
+
+    // Get reply counts
+    const postIds = data.map(p => p.id)
+    const { data: replyCounts } = await db
+      .from('replies')
+      .select('post_id')
+      .in('post_id', postIds)
+
+    const countMap = {}
+    replyCounts?.forEach(r => {
+      countMap[r.post_id] = (countMap[r.post_id] || 0) + 1
+    })
 
     list.innerHTML = data.map(post => `
       <a class="post-item" href="post.html?id=${post.id}">
@@ -394,19 +486,21 @@ function toggleProfileMenu() {
         </div>
         <div class="post-title">${post.title}</div>
         <div class="post-body-preview">${post.body}</div>
+        <div class="post-footer">
+          <span class="reply-count">↩ ${countMap[post.id] || 0} ${countMap[post.id] === 1 ? 'reply' : 'replies'}</span>
+        </div>
       </a>
     `).join('')
   }
 
   function filterCategory(id, el) {
-    document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'))
+    document.querySelectorAll('.category-list a, .all-link').forEach(a => a.classList.remove('active'))
     el.classList.add('active')
     currentCategoryId = id
     document.getElementById('current-category').textContent = id ? el.textContent : 'All Discussions'
     loadPosts(id)
   }
 
-  // Modal
   function openModal() {
     if (!currentUser) { window.location.href = 'login.html'; return; }
     document.getElementById('modal').classList.add('open')
@@ -414,6 +508,10 @@ function toggleProfileMenu() {
 
   function closeModal() {
     document.getElementById('modal').classList.remove('open')
+    document.getElementById('post-title').value = ''
+    document.getElementById('post-body').value = ''
+    document.getElementById('post-parent-category').value = ''
+    document.getElementById('post-category').innerHTML = '<option value="">Subcategory</option>'
   }
 
   async function submitPost() {
@@ -421,7 +519,9 @@ function toggleProfileMenu() {
     const body = document.getElementById('post-body').value.trim()
     const category_id = document.getElementById('post-category').value
 
-    if (!title || !body || !category_id) { alert('Please fill in all fields'); return; }
+    if (!title || !body || !category_id) { alert('Please fill in all fields including subcategory'); return; }
+    if (title.length < 5) { alert('Title must be at least 5 characters'); return; }
+    if (body.length < 10) { alert('Post must be at least 10 characters'); return; }
 
     const { error } = await db.from('posts').insert({
       title, body,
@@ -435,7 +535,6 @@ function toggleProfileMenu() {
     loadPosts(currentCategoryId)
   }
 
-  // Utility
   function timeAgo(dateStr) {
     const diff = (Date.now() - new Date(dateStr)) / 1000
     if (diff < 60) return 'just now'
@@ -444,7 +543,6 @@ function toggleProfileMenu() {
     return `${Math.floor(diff/86400)}d ago`
   }
 
-  // Init
   initAuth()
   loadCategories()
   loadPosts()
