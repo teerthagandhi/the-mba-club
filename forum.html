@@ -69,50 +69,6 @@
     }
 
     /* SIDEBAR */
-    .sidebar-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #bbb;
-      margin-bottom: 0.5rem;
-      padding: 0 6px;
-    }
-
-    .category-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .category-group-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 4px 8px;
-      margin-bottom: 2px;
-    }
-
-    .category-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .category-list li a {
-      display: block;
-      font-size: 13px;
-      color: #444;
-      text-decoration: none;
-      padding: 5px 8px;
-      border-radius: 5px;
-      transition: background 0.1s;
-    }
-
-    .category-list li a:hover { background: #f5f5f5; }
-    .category-list li a.active { background: #6B1F1F; color: #fff; }
-
     .all-link {
       display: block;
       font-size: 13px;
@@ -121,11 +77,66 @@
       text-decoration: none;
       padding: 5px 8px;
       border-radius: 5px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
     }
 
     .all-link:hover { background: #f5f5f5; }
     .all-link.active { background: #6B1F1F; color: #fff; }
+
+    .category-group { margin-bottom: 4px; }
+
+    .category-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .category-group-header:hover { background: #f5f5f5; }
+    .category-group-header.active { background: #6B1F1F; color: #fff; }
+
+    .category-group-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: inherit;
+    }
+
+    .category-group-header.active .category-group-name { color: #fff; }
+
+    .chevron {
+      font-size: 10px;
+      color: #bbb;
+      transition: transform 0.2s;
+    }
+
+    .category-group-header.active .chevron { color: rgba(255,255,255,0.6); }
+    .category-group.open .chevron { transform: rotate(180deg); }
+
+    .subcategory-list {
+      list-style: none;
+      display: none;
+      flex-direction: column;
+      gap: 1px;
+      padding: 2px 0 4px 8px;
+    }
+
+    .category-group.open .subcategory-list { display: flex; }
+
+    .subcategory-list li a {
+      display: block;
+      font-size: 12px;
+      color: #555;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .subcategory-list li a:hover { background: #f5f5f5; color: #000; }
+    .subcategory-list li a.active { background: #fdf0f0; color: #6B1F1F; font-weight: 500; }
 
     /* MAIN */
     .main-header {
@@ -141,10 +152,7 @@
       letter-spacing: -0.5px;
     }
 
-    .post-list {
-      display: flex;
-      flex-direction: column;
-    }
+    .post-list { display: flex; flex-direction: column; }
 
     .post-item {
       border-top: 0.5px solid #e0e0e0;
@@ -203,9 +211,6 @@
     .reply-count {
       font-size: 11px;
       color: #bbb;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .empty-state {
@@ -267,6 +272,12 @@
       gap: 8px;
     }
 
+    .modal-select-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
     /* DROPDOWN */
     .profile-menu { position: relative; }
 
@@ -308,13 +319,6 @@
 
     .dropdown-item:hover { background: #f5f5f5; }
     .hidden { display: none; }
-
-    /* MODAL CATEGORY SELECT */
-    .modal-select-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
   </style>
 </head>
 <body>
@@ -331,7 +335,7 @@
 
 <div class="container">
   <aside class="sidebar">
-    <a href="#" class="all-link active" id="all-link" onclick="filterCategory(null, this)">All Discussions</a>
+    <a href="#" class="all-link active" id="all-link" onclick="filterAll(this)">All Discussions</a>
     <div id="category-sidebar"></div>
   </aside>
 
@@ -369,6 +373,7 @@
 <script>
   let currentUser = null
   let currentCategoryId = null
+  let currentParentId = null
   let allCategories = []
 
   async function initAuth() {
@@ -408,23 +413,32 @@
     parents.forEach(parent => {
       const children = allCategories.filter(c => c.parent_id === parent.id)
 
-      // Sidebar group
       const group = document.createElement('div')
       group.className = 'category-group'
-      group.innerHTML = `<div class="category-group-title">${parent.name}</div>`
+      group.id = `group-${parent.id}`
+
+      const header = document.createElement('div')
+      header.className = 'category-group-header'
+      header.innerHTML = `
+        <span class="category-group-name">${parent.name}</span>
+        <span class="chevron">▾</span>
+      `
+      header.onclick = () => toggleGroup(parent.id, header)
+
       const ul = document.createElement('ul')
-      ul.className = 'category-list'
+      ul.className = 'subcategory-list'
 
       children.forEach(child => {
         const li = document.createElement('li')
-        li.innerHTML = `<a href="#" onclick="filterCategory(${child.id}, this)">${child.name}</a>`
+        li.innerHTML = `<a href="#" id="cat-${child.id}" onclick="filterCategory(${child.id}, ${parent.id}, this)">${child.name}</a>`
         ul.appendChild(li)
       })
 
+      group.appendChild(header)
       group.appendChild(ul)
       sidebar.appendChild(group)
 
-      // Modal parent select
+      // Modal
       const opt = document.createElement('option')
       opt.value = parent.id
       opt.textContent = parent.name
@@ -432,11 +446,56 @@
     })
   }
 
+  function toggleGroup(parentId, headerEl) {
+    const group = document.getElementById(`group-${parentId}`)
+    const isOpen = group.classList.contains('open')
+
+    if (isOpen) {
+      group.classList.remove('open')
+      headerEl.classList.remove('active')
+    } else {
+      group.classList.add('open')
+      // Filter by parent (show all posts in this group)
+      clearActiveStates()
+      headerEl.classList.add('active')
+      currentCategoryId = null
+      currentParentId = parentId
+      const parentName = allCategories.find(c => c.id === parentId)?.name
+      document.getElementById('current-category').textContent = parentName || 'All Discussions'
+      loadPosts()
+    }
+  }
+
+  function filterAll(el) {
+    clearActiveStates()
+    el.classList.add('active')
+    currentCategoryId = null
+    currentParentId = null
+    document.getElementById('current-category').textContent = 'All Discussions'
+    loadPosts()
+  }
+
+  function filterCategory(childId, parentId, el) {
+    clearActiveStates()
+    el.classList.add('active')
+    // Keep parent group open
+    document.getElementById(`group-${parentId}`).classList.add('open')
+    currentCategoryId = childId
+    currentParentId = null
+    document.getElementById('current-category').textContent = el.textContent
+    loadPosts()
+  }
+
+  function clearActiveStates() {
+    document.querySelectorAll('.category-group-header').forEach(h => h.classList.remove('active'))
+    document.querySelectorAll('.subcategory-list li a').forEach(a => a.classList.remove('active'))
+    document.getElementById('all-link').classList.remove('active')
+  }
+
   function filterSubcategories() {
     const parentId = parseInt(document.getElementById('post-parent-category').value)
     const subSelect = document.getElementById('post-category')
     subSelect.innerHTML = '<option value="">Subcategory</option>'
-
     const children = allCategories.filter(c => c.parent_id === parentId)
     children.forEach(child => {
       const opt = document.createElement('option')
@@ -446,25 +505,29 @@
     })
   }
 
-  async function loadPosts(categoryId = null) {
+  async function loadPosts() {
+    const list = document.getElementById('post-list')
+    list.innerHTML = '<div class="empty-state">Loading...</div>'
+
     let query = db
       .from('posts')
-      .select('*, profiles(username), categories(name, parent_id)')
+      .select('*, profiles(username), categories(id, name, parent_id)')
       .order('created_at', { ascending: false })
 
-    if (categoryId) {
-      query = query.eq('category_id', categoryId)
+    if (currentCategoryId) {
+      query = query.eq('category_id', currentCategoryId)
+    } else if (currentParentId) {
+      const childIds = allCategories.filter(c => c.parent_id === currentParentId).map(c => c.id)
+      query = query.in('category_id', childIds)
     }
 
     const { data } = await query
-    const list = document.getElementById('post-list')
 
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty-state">No posts yet. Be the first to post.</div>'
       return
     }
 
-    // Get reply counts
     const postIds = data.map(p => p.id)
     const { data: replyCounts } = await db
       .from('replies')
@@ -491,14 +554,6 @@
         </div>
       </a>
     `).join('')
-  }
-
-  function filterCategory(id, el) {
-    document.querySelectorAll('.category-list a, .all-link').forEach(a => a.classList.remove('active'))
-    el.classList.add('active')
-    currentCategoryId = id
-    document.getElementById('current-category').textContent = id ? el.textContent : 'All Discussions'
-    loadPosts(id)
   }
 
   function openModal() {
@@ -532,7 +587,7 @@
     if (error) { alert('Error posting. Are you logged in?'); return; }
 
     closeModal()
-    loadPosts(currentCategoryId)
+    loadPosts()
   }
 
   function timeAgo(dateStr) {
