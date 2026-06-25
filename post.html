@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post — The MBA Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: #000;
+      min-height: 100vh;
+    }
+
+    nav {
+      border-bottom: 0.5px solid #e0e0e0;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 900;
+      font-size: 16px;
+      text-decoration: none;
+      color: #000;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-small {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      border: 0.5px solid #000;
+      background: transparent;
+      color: #000;
+    }
+
+    .btn-small:hover { opacity: 0.7; }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    .back {
+      font-size: 12px;
+      color: #999;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .back:hover { color: #000; }
+
+    .post-category-tag {
+      background: #f0f0f0;
+      color: #555;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .post-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .post-meta {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 8px;
+    }
+
+    .post-body {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #111;
+      padding-bottom: 2.5rem;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+
+    .replies-header {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2rem 0 1.5rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .reply-item {
+      padding: 1.2rem 0;
+      border-bottom: 0.5px solid #f0f0f0;
+    }
+
+    .reply-meta {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 6px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .reply-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #111;
+    }
+
+    .reply-box {
+      margin-top: 2.5rem;
+    }
+
+    .reply-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .reply-box textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      border: 0.5px solid #ccc;
+      border-radius: 6px;
+      padding: 10px 14px;
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+      outline: none;
+      color: #000;
+      margin-bottom: 0.75rem;
+    }
+
+    .reply-box textarea:focus { border-color: #000; }
+
+    .btn-reply {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 20px;
+      cursor: pointer;
+    }
+
+    .btn-reply:hover { opacity: 0.7; }
+
+    .empty-replies {
+      font-size: 13px;
+      color: #bbb;
+      padding: 1.5rem 0;
+    }
+
+    .login-prompt {
+      font-size: 13px;
+      color: #999;
+      margin-top: 1rem;
+    }
+
+    .login-prompt a {
+      color: #000;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">The MBA Club</a>
+  <div class="nav-right">
+    <span id="nav-user" style="font-size:12px;color:#999"></span>
+    <a href="login.html" class="btn-small" id="btn-login">Log in</a>
+  </div>
+</nav>
+
+<div class="container">
+  <a href="forum.html" class="back">← Back to forum</a>
+  <div id="post-content">Loading...</div>
+  <div id="replies-section"></div>
+</div>
+
+<script>
+  let currentUser = null
+  const postId = new URLSearchParams(window.location.search).get('id')
+
+  async function initAuth() {
+    const { data: { session } } = await db.auth.getSession()
+    if (session) {
+      currentUser = session.user
+      document.getElementById('nav-user').textContent = session.user.email
+      document.getElementById('btn-login').textContent = 'Log out'
+      document.getElementById('btn-login').onclick = async () => {
+        await db.auth.signOut()
+        window.location.reload()
+      }
+    }
+  }
+
+  async function loadPost() {
+    const { data: post } = await db
+      .from('posts')
+      .select('*, profiles(username), categories(name)')
+      .eq('id', postId)
+      .single()
+
+    if (!post) {
+      document.getElementById('post-content').innerHTML = '<p>Post not found.</p>'
+      return
+    }
+
+    document.title = `${post.title} — The MBA Club`
+
+    document.getElementById('post-content').innerHTML = `
+      <span class="post-category-tag">${post.categories?.name || ''}</span>
+      <h1 class="post-title">${post.title}</h1>
+      <div class="post-meta">
+        <span>${post.profiles?.username || 'Anonymous'}</span>
+        <span>·</span>
+        <span>${timeAgo(post.created_at)}</span>
+      </div>
+      <div class="post-body">${post.body}</div>
+    `
+  }
+
+  async function loadReplies() {
+    const { data: replies } = await db
+      .from('replies')
+      .select('*, profiles(username)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+
+    const section = document.getElementById('replies-section')
+
+    const repliesHTML = replies && replies.length > 0
+      ? replies.map(r => `
+          <div class="reply-item">
+            <div class="reply-meta">
+              <span>${r.profiles?.username || 'Anonymous'}</span>
+              <span>·</span>
+              <span>${timeAgo(r.created_at)}</span>
+            </div>
+            <div class="reply-body">${r.body}</div>
+          </div>
+        `).join('')
+      : '<p class="empty-replies">No replies yet. Be the first.</p>'
+
+    const replyBox = currentUser
+      ? `<div class="reply-box">
+           <h3>Write a reply</h3>
+           <textarea id="reply-body" placeholder="Your reply..."></textarea>
+           <button class="btn-reply" onclick="submitReply()">Post reply</button>
+         </div>`
+      : `<p class="login-prompt"><a href="login.html">Log in</a> to reply.</p>`
+
+    section.innerHTML = `
+      <div class="replies-header">${replies?.length || 0} Replies</div>
+      ${repliesHTML}
+      ${replyBox}
+    `
+  }
+
+  async function submitReply() {
+    const body = document.getElementById('reply-body').value.trim()
+    if (!body) return
+
+    const { error } = await db.from('replies').insert({
+      body,
+      post_id: parseInt(postId),
+      user_id: currentUser.id
+    })
+
+    if (error) { alert('Error posting reply.'); return; }
+    loadReplies()
+  }
+
+  function timeAgo(dateStr) {
+    const diff = (Date.now() - new Date(dateStr)) / 1000
+    if (diff < 60) return 'just now'
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`
+    return `${Math.floor(diff/86400)}d ago`
+  }
+
+  initAuth()
+  loadPost()
+  loadReplies()
+</script>
+
+</body>
+</html>n

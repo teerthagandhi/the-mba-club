@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum — The MBA Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: #000;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 0.5px solid #e0e0e0;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 900;
+      font-size: 16px;
+      text-decoration: none;
+      color: #000;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-small {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      border: 0.5px solid #000;
+      background: transparent;
+      color: #000;
+    }
+
+    .btn-small.filled {
+      background: #000;
+      color: #fff;
+    }
+
+    .btn-small:hover { opacity: 0.7; }
+
+    /* LAYOUT */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+    }
+
+    /* SIDEBAR */
+    .sidebar h3 {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 1rem;
+    }
+
+    .category-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .category-list li a {
+      display: block;
+      font-size: 13px;
+      color: #333;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    .category-list li a:hover { background: #f5f5f5; }
+    .category-list li a.active { background: #000; color: #fff; }
+
+    /* MAIN */
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .main-header h2 {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    /* POSTS */
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .post-item {
+      border-top: 0.5px solid #e0e0e0;
+      padding: 1.2rem 0;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .post-item:last-child { border-bottom: 0.5px solid #e0e0e0; }
+    .post-item:hover .post-title { opacity: 0.6; }
+
+    .post-meta {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 4px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .post-category-tag {
+      background: #f0f0f0;
+      color: #555;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    .post-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      margin-bottom: 4px;
+      transition: opacity 0.15s;
+    }
+
+    .post-body-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 0;
+      color: #999;
+      font-size: 14px;
+    }
+
+    /* NEW POST MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal h3 {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      border: 0.5px solid #ccc;
+      border-radius: 6px;
+      padding: 10px 14px;
+      width: 100%;
+      outline: none;
+      color: #000;
+    }
+
+    .modal textarea { min-height: 120px; resize: vertical; }
+    .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: #000; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">The MBA Club</a>
+  <div class="nav-right">
+    <span id="nav-user" style="font-size:12px;color:#999"></span>
+    <a href="login.html" class="btn-small" id="btn-login">Log in</a>
+    <button class="btn-small filled" id="btn-new-post" onclick="openModal()">+ New Post</button>
+  </div>
+</nav>
+
+<div class="container">
+  <aside class="sidebar">
+    <h3>Categories</h3>
+    <ul class="category-list" id="category-list">
+      <li><a href="#" class="active" onclick="filterCategory(null, this)">All</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <div class="main-header">
+      <h2 id="current-category">All Discussions</h2>
+    </div>
+    <div class="post-list" id="post-list">
+      <div class="empty-state">Loading...</div>
+    </div>
+  </main>
+</div>
+
+<!-- NEW POST MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>New Post</h3>
+    <select id="post-category">
+      <option value="">Select a category</option>
+    </select>
+    <input type="text" id="post-title" placeholder="Title" />
+    <textarea id="post-body" placeholder="What's on your mind?"></textarea>
+    <div class="modal-actions">
+      <button class="btn-small" onclick="closeModal()">Cancel</button>
+      <button class="btn-small filled" onclick="submitPost()">Post</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentUser = null
+  let currentCategoryId = null
+
+  // Auth state
+  async function initAuth() {
+    const { data: { session } } = await db.auth.getSession()
+    if (session) {
+      currentUser = session.user
+      document.getElementById('nav-user').textContent = session.user.email
+      document.getElementById('btn-login').textContent = 'Log out'
+      document.getElementById('btn-login').onclick = logout
+    }
+  }
+
+  async function logout() {
+    await db.auth.signOut()
+    window.location.reload()
+  }
+
+  // Load categories
+  async function loadCategories() {
+    const { data } = await db.from('categories').select('*').order('id')
+    const list = document.getElementById('category-list')
+    const select = document.getElementById('post-category')
+
+    data.forEach(cat => {
+      const li = document.createElement('li')
+      li.innerHTML = `<a href="#" onclick="filterCategory(${cat.id}, this)">${cat.name}</a>`
+      list.appendChild(li)
+
+      const opt = document.createElement('option')
+      opt.value = cat.id
+      opt.textContent = cat.name
+      select.appendChild(opt)
+    })
+  }
+
+  // Load posts
+  async function loadPosts(categoryId = null) {
+    let query = db
+      .from('posts')
+      .select('*, profiles(username), categories(name)')
+      .order('created_at', { ascending: false })
+
+    if (categoryId) query = query.eq('category_id', categoryId)
+
+    const { data, error } = await query
+    const list = document.getElementById('post-list')
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty-state">No posts yet. Be the first to post.</div>'
+      return
+    }
+
+    list.innerHTML = data.map(post => `
+      <a class="post-item" href="post.html?id=${post.id}">
+        <div class="post-meta">
+          <span class="post-category-tag">${post.categories?.name || ''}</span>
+          <span>${post.profiles?.username || 'Anonymous'}</span>
+          <span>·</span>
+          <span>${timeAgo(post.created_at)}</span>
+        </div>
+        <div class="post-title">${post.title}</div>
+        <div class="post-body-preview">${post.body}</div>
+      </a>
+    `).join('')
+  }
+
+  function filterCategory(id, el) {
+    document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'))
+    el.classList.add('active')
+    currentCategoryId = id
+    document.getElementById('current-category').textContent = id ? el.textContent : 'All Discussions'
+    loadPosts(id)
+  }
+
+  // Modal
+  function openModal() {
+    if (!currentUser) { window.location.href = 'login.html'; return; }
+    document.getElementById('modal').classList.add('open')
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open')
+  }
+
+  async function submitPost() {
+    const title = document.getElementById('post-title').value.trim()
+    const body = document.getElementById('post-body').value.trim()
+    const category_id = document.getElementById('post-category').value
+
+    if (!title || !body || !category_id) { alert('Please fill in all fields'); return; }
+
+    const { error } = await db.from('posts').insert({
+      title, body,
+      category_id: parseInt(category_id),
+      user_id: currentUser.id
+    })
+
+    if (error) { alert('Error posting. Are you logged in?'); return; }
+
+    closeModal()
+    loadPosts(currentCategoryId)
+  }
+
+  // Utility
+  function timeAgo(dateStr) {
+    const diff = (Date.now() - new Date(dateStr)) / 1000
+    if (diff < 60) return 'just now'
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`
+    return `${Math.floor(diff/86400)}d ago`
+  }
+
+  // Init
+  initAuth()
+  loadCategories()
+  loadPosts()
+</script>
+
+</body>
+</html>
